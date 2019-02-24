@@ -1,4 +1,4 @@
-import { observable, reaction, configure, computed, action } from 'mobx';
+import { observable, IObservableValue, configure, computed, action, intercept } from 'mobx';
 
 configure({enforceActions: 'always'});
 
@@ -9,17 +9,25 @@ export type CounterStoreType = {
 }
 
 export default class CounterStore {
-  @observable private currentCount: number = 0;
-  @computed get count(): number {
-    return this.currentCount;
+  private currentCount: IObservableValue<number> = observable.box(0);
+
+  @computed
+  get count(): number {
+    return this.currentCount.get();
   }
-  @computed get doubleCount(): number {
-    return this.currentCount * 2;
+
+  @computed
+  get doubleCount(): number {
+    return this.currentCount.get() * 2;
   }
-  @action.bound incrementCount() {
-    this.currentCount++;
+
+  @action.bound
+  incrementCount() {
+    this.currentCount.set(this.count + 1);
   }
-  @action.bound decrementCount() {
-    this.currentCount--;
+
+  @action.bound
+  decrementCount() {
+    this.currentCount.set(this.count - 1);
   }
 }
